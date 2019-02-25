@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <style>
+        p {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+
+<body>
+    <br /><br />
+
+    <div class="container">
+
+        <div id="apiDiv">
+            <center>
+                <h1 class="Title">Search Star</h1>
+                <input type="text" id="searchInput" placeholder="Search actor" />
+                <br />
+                <button id="submit">Search</button>
+            </center>
+            <div class="imageDiv">
+                <img src="~/Content/Image/loading.gif" />
+            </div>
+            <div id="message">
+            </div>
+        </div>
+        <ul id="pagination"></ul>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="modalTitleH4"></h4>
+                </div>
+                <div class="modal-body" id="modalBodyDiv">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="JS/jquery.twbsPagination.js"></script>
+    <script>
+        //-------------- Start js-----------
+        $(document).ready(function () {
+            $("#reset").click(function (e) {
+                location.reload();
+            });
+            ///----------- when submitted, validate input
+            $("#submit").click(function (e) {
+                var validate = Validate();
+                $("#message").html(validate);
+                if (validate.length == 0) { ///if true, call API
+                    CallAPI(1);
+                }
+            });
+
+            //--------------- actor details-------------
+            $("#message").on("click", ".result", function () {
+                var resourceId = $(this).attr("resourceId");
+                $.ajax({
+                    url: "https://api.themoviedb.org/3/person/" + resourceId + "?language=en-US&append_to_response=movie_credits",
+                    data: {
+                        api_key: "3461c392c62cb154641f2ea5a74eef41"
+                    },
+                    dataType: 'json',
+                    success: function (result, status, xhr) {
+                        $("#modalTitleH4").html(result["name"]);
+
+                        var image = result["profile_path"] == null ? "Image/no-image.png" : "https://image.tmdb.org/t/p/w500/" + result["profile_path"];
+                        var biography = result["biography"] == null ? "No information available" : result["biography"];
+
+                        //----Find movies cast===
+
+                        var casted = result["movie_credits"]["cast"].length;
+                        for (var j = 0; j < result["movie_credits"]["cast"].length; j++) {
+                            casted += result["movie_credits"]["cast"][j]["title"] + ", ";
+                        }
+
+
+                        var resultHtml = "<p class=\"text-center\"><img height= \"450\" width=\"400\" src=\"" + image + "\"/></p>";
+                        resultHtml += "<p> <b> Birdthday:</b> " + result["birthday"] + "</p><p> <b> Place of Birth: </b>" + result["place_of_birth"] +
+                            "<p> <b>  Casted in: </b>" + casted + "</p>";
+
+                        $("#modalBodyDiv").html(resultHtml)
+
+                        $("#myModal").modal("show");
+                    },
+                    error: function (xhr, status, error) {
+                        $("#message").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                });
+            });
+
+            $(document).ajaxStart(function () {
+                $(".imageDiv img").show();
+            });
+
+            $(document).ajaxStop(function () {
+                $(".imageDiv img").hide();
+            });
+
+            //--------------------------Find Actor--------------------
+            function CallAPI(page) {
+                $.ajax({
+                    url: "https://api.themoviedb.org/3/search/person?language=en-US&query=" + $("#searchInput").val() + "&page=" + page + "&include_adult=false",
+                    data: { "api_key": "3461c392c62cb154641f2ea5a74eef41" },
+                    dataType: "json",
+                    success: function (result, status, xhr) {
+                        var resultHtml = $("<div class=\"resultDiv\"><p>Names</p>");
+                        for (i = 0; i < result["results"].length; i++) {
+
+                            var image = result["results"][i]["profile_path"] == null ? "Image/no-image.png" : "https://image.tmdb.org/t/p/w500/" + result["results"][i]["profile_path"];
+
+                            resultHtml.append("<div class=\"result\" resourceId=\"" + result["results"][i]["id"] + "\">" + "<img src=\"" + image + "\" />" + "<p><a>" + result["results"][i]["name"] + "</a></p></div>")
+                        }
+
+                        resultHtml.append("</div>");
+                        $("#message").html(resultHtml);
+
+                        Paging(result["total_pages"]);
+                    },
+                    error: function (xhr, status, error) {
+                        $("#message").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                });
+            }
+
+            //-------------------------Validate correct input--------------------
+            function Validate() {
+                var errorMessage = "";
+                if ($("#searchInput").val() == "") {
+                    errorMessage += "► Enter Search Text";
+                }
+                return errorMessage;
+            }
+
+            function Paging(totalPage) {
+                var obj = $("#pagination").twbsPagination({
+                    totalPages: totalPage,
+                    visiblePages: 5,
+                    onPageClick: function (event, page) {
+                        CallAPI(page);
+                    }
+                });
+            }
+
+        });
+    </script>
+
+</body>
+</html>

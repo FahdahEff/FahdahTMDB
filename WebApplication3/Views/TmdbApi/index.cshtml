@@ -1,0 +1,161 @@
+﻿@*// This page contains homepage and necessary auto authentication to create request id, session id, and access token
+    needed to access favorite movies*@
+@{
+                /**/
+
+                ViewBag.Title = "Homepage";
+}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<link href="~/Content/Site.css" rel="stylesheet" />
+
+<style>
+
+    p {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    ul, li {
+        color: white;
+    }
+</style>
+<br />
+<h1 class="Title"> <b> Welcome! </b> </h1>
+<h2 class="Title"> Functionalites: </h2>
+<hr />
+<div style="background-color:rgba(192,192,192,0.3);">
+    <ul>
+        <b> Movies:</b>
+
+        <li>I can search movies. </li>
+        <li>I can see movie details (Movie Name, Poster, Movie Description, Genres)</li>
+        <li>I can see similar movies for each movie. </li>
+        <li>I can see my favorite movies. </li>
+        <li>I can see more movie details (Cast names and posters). </li>
+        <li>I can see the latest movies.</li>
+        <li> I can add a movie or remove it from my favorites.</li> 
+
+        <b>Stars:</b>
+        <li>I can search stars.</li>
+        <li>I can see star details with the list of movies casted in.</li>
+
+    </ul>
+</div>
+
+
+
+@*//-----------------AUTHORIZATION-----------------*@
+<div>
+    @*<label>v4 API Read Access Token</label>*@
+    <textarea id="api_read_access_token" hidden name="api_read_access_token" placeholder="Paste your API read access token (from your account page) here...">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzNDYxYzM5MmM2MmNiMTU0NjQxZjJlYTVhNzRlZWY0MSIsInN1YiI6IjVjNzA0NDYwMGUwYTI2MDZkNzZhYmQ0MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.6HviG4xYXUVDu4E4qkkkEkymSEKoJ6ESo2hjChAGlLs</textarea>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+    // var api_host = 'http://api.dev';
+    // var web_host = 'http://web.dev';
+
+    var api_host = 'https://api.themoviedb.org';
+    var web_host = 'https://www.themoviedb.org';
+
+    var requestToken = '';
+    var readAccessToken = $('#api_read_access_token').val();
+
+    getRequestToken('temp', getAccessToken()); //FIRST
+
+
+    function getApiReadAccessToken() {
+        // v4 Read Acess Token
+        var readAccessToken = $('#api_read_access_token').val();
+        localStorage.setItem("readAccessToken", readAccessToken); //1 save value
+        return $('#api_read_access_token').val();
+    }
+
+    function showError(response) {
+        $('#error').html(JSON.stringify(response.responseJSON));
+    }
+
+    function showResponse(response, time) {
+        $('#response').html(JSON.stringify(response));
+        $('#response_title span').html('(' + time + 'ms)')
+    }
+
+    function getRequestToken(value, AccessCallback) { //1
+        $.ajax({
+            url: api_host + '/4/auth/request_token',
+            method: 'POST',
+            dataType: 'json',
+            headers: {
+                'Authorization': 'Bearer ' + getApiReadAccessToken(),
+                'Content-Type': 'application/json'
+            },
+            start_time: new Date().getTime()
+        }).error(function (response) {
+            showError(response);
+        }).fail(function (response) {
+            showError(response);
+        }).done(function (response) {
+            showResponse(response, (new Date().getTime() - this.start_time));
+
+            if (response.success) {
+                requestToken = response.request_token
+                // Request token
+                localStorage.setItem("requestToken", requestToken); //2 save value
+                AccessCallback();
+                $('#approveRequestToken').removeClass('hide');
+                $('#getAccessToken').removeClass('hide');
+            }
+        });
+    }
+
+    function getAccessToken() { //2
+        $.ajax({
+            url: api_host + '/4/auth/access_token',
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + getApiReadAccessToken(),
+                'Content-Type': 'application/json'
+            },
+            dataType: 'json',
+            data: JSON.stringify({ request_token: requestToken }),
+            start_time: new Date().getTime()
+        }).error(function (response) {
+            showError(response);
+        }).fail(function (response) {
+            showError(response);
+        }).done(function (response) {
+            showResponse(response, (new Date().getTime() - this.start_time));
+
+            var accessToken = response.access_token
+            // ----------Request token----------
+            localStorage.setItem("accessToken", accessToken); //2 save value
+
+            $('#access_token').html(response.access_token);
+            $('#account_id').html(response.account_id);
+        });
+    }
+
+
+
+);
+
+
+
+    $(document).ready(function () {
+        $('#getRequestToken').on('click', function () {
+            getRequestToken();
+        });
+
+        $('#approveRequestToken').on('click', function () {
+            window.open(web_host + '/auth/access?request_token=' + requestToken);
+        });
+
+        $('#getAccessToken').on('click', function () {
+            getAccessToken();
+        });
+
+        $('#getSessionID').on('click', function () {
+            getSessionID();
+        });
+
+    });
+</script>

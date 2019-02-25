@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Credits</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <style>
+        p {
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <br /><br />
+    <div class="container">
+
+        <div id="apiDiv">
+            <center>
+                <h1 class="Title">Search movie to see credits</h1>
+                <input type="text" id="searchInput" placeholder="Search " />
+                <br />
+                <button id="submit">Search</button>
+            </center>
+            <div class="imageDiv">
+                <img src="~/Content/Image/loading.gif" />
+            </div>
+            <div id="message">
+            </div>
+        </div>
+        <ul id="pagination"></ul>
+    </div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="modalTitleH4"></h4>
+                </div>
+                <div class="modal-body" id="modalBodyDiv">
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="JS/jquery.twbsPagination.js"></script>
+    <script>
+        //-------------- Start js-----------
+        $(document).ready(function () {
+
+            ///----------- when submitted, validate input
+            $("#submit").click(function (e) {
+                var validate = Validate();
+                $("#message").html(validate);
+                if (validate.length == 0) { ///if true, call API
+                    CallAPI(1);
+                }
+            });
+
+
+            //--------------- Movie details CAST-------------
+            $("#message").on("click", ".result", function () {
+                var resourceId = $(this).attr("resourceId");
+                $.ajax({
+
+                    url: "https://api.themoviedb.org/3/movie/" + resourceId + "/credits?language=en-US",
+
+                    data: {
+                        api_key: "3461c392c62cb154641f2ea5a74eef41"
+                    },
+                    dataType: 'json',
+                    success: function (result, status, xhr) {
+                        $("#modalTitleH4").html(result["name"]);
+
+
+                        //----Find cast===
+                        var cast = "";
+                        for (var j = 0; j < result["cast"].length; j++) {
+                            cast += result["cast"][j]["name"] + ", ";
+                        }
+
+                        var resultHtml = "<p class=\"text-center\"> </p> <p> <b> Cast: </b>" + cast + "";
+
+                        $("#modalBodyDiv").html(resultHtml)
+
+                        $("#myModal").modal("show");
+                    },
+                    error: function (xhr, status, error) {
+                        $("#message").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                });
+            });
+
+            //---------------- just feedback images------------
+            $(document).ajaxStart(function () {
+                $(".imageDiv img").show();
+            });
+
+            $(document).ajaxStop(function () {
+                $(".imageDiv img").hide();
+            });
+
+            //--------------------------Find Movie--------------------
+            function CallAPI(page) {
+                $.ajax({
+                    url: "https://api.themoviedb.org/3/search/movie?language=en-US&query=" + $("#searchInput").val() + "&page=" + page + "&include_adult=false",
+                    data: { "api_key": "3461c392c62cb154641f2ea5a74eef41" },
+                    dataType: "json",
+                    success: function (result, status, xhr) {
+                        var resultHtml = $("<div class=\"resultDiv\"><p>Names</p>");
+                        for (i = 0; i < result["results"].length; i++) {
+
+                            var image = result["results"][i]["poster_path"] == null ? "Image/no-image.png" : "https://image.tmdb.org/t/p/w500/" + result["results"][i]["poster_path"];
+
+                            resultHtml.append("<div class=\"result\" resourceId=\"" + result["results"][i]["id"] + "\">" + "<img src=\"" + image + "\" />" + "<p><a>" + result["results"][i]["title"] + "</a></p></div>")
+                        }
+
+                        resultHtml.append("</div>");
+                        $("#message").html(resultHtml);
+
+                        Paging(result["total_pages"]);
+                    },
+                    error: function (xhr, status, error) {
+                        $("#message").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                });
+            }
+
+            //-------------------------Validate correct input--------------------
+            function Validate() {
+                var errorMessage = "";
+                if ($("#searchInput").val() == "") {
+                    errorMessage += "► Enter Search Text";
+                }
+                return errorMessage;
+            }
+
+            function Paging(totalPage) {
+                var obj = $("#pagination").twbsPagination({
+                    totalPages: totalPage,
+                    visiblePages: 5,
+                    onPageClick: function (event, page) {
+                        CallAPI(page);
+                    }
+                });
+            }
+
+        });
+    </script>
+</body>
+</html>

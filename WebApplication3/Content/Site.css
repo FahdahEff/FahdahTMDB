@@ -1,0 +1,176 @@
+﻿
+:root {
+    /* generic */
+    --gutterSm: 0.4rem;
+    --gutterMd: 0.8rem;
+    --gutterLg: 1.6rem;
+    --gutterXl: 2.4rem;
+    --gutterXx: 7.2rem;
+    --colorPrimary400: #7e57c2;
+    --colorPrimary600: #5e35b1;
+    --colorPrimary800: #4527a0;
+    --fontFamily: "Dosis", sans-serif;
+    --fontSizeSm: 1.2rem;
+    --fontSizeMd: 1.6rem;
+    --fontSizeLg: 2.1rem;
+    --fontSizeXl: 2.8rem;
+    --fontSizeXx: 3.6rem;
+    --lineHeightSm: 1.1;
+    --lineHeightMd: 1.8;
+    --transitionDuration: 300ms;
+    --transitionTF: cubic-bezier(0.645, 0.045, 0.355, 1);
+    /* floated labels */
+    --inputPaddingV: var(--gutterMd);
+    --inputPaddingH: var(--gutterLg);
+    --inputFontSize: var(--fontSizeLg);
+    --inputLineHeight: var(--lineHeightMd);
+    --labelScaleFactor: 0.8;
+    --labelDefaultPosY: 50%;
+    --labelTransformedPosY: calc( (var(--labelDefaultPosY)) - (var(--inputPaddingV) * var(--labelScaleFactor)) - (var(--inputFontSize) * var(--inputLineHeight)) );
+    --inputTransitionDuration: var(--transitionDuration);
+    --inputTransitionTF: var(--transitionTF);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 10px;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    color: #455A64;
+    background-color: #7E57C2;
+    font-family: var(--fontFamily);
+    font-size: var(--fontSizeMd);
+    line-height: var(--lineHeightMd);
+}
+
+
+
+#apiDiv {
+    margin: 0 0 var(--gutterXx) 0;
+    padding: 0;
+    font-size: var(--fontSizeXx);
+    font-weight: 400;
+    apiDiv line-height: var(--lineHeightSm);
+    text-align: center;
+    text-shadow: -0.1rem 0.1rem 0.2rem var(--colorPrimary800);
+}
+
+/*.apiDiv {
+            position: relative;
+        }*/
+
+button {
+    display: block;
+    margin: 0;
+    background-color: #222222;
+    padding: var(--inputPaddingV) var(--inputPaddingH);
+    color: white;
+    font-family: inherit;
+    font-size: var(--inputFontSize);
+    font-weight: inherit;
+    line-height: var(--inputLineHeight);
+    border: none;
+    border-radius: 0.5rem;
+    transition: box-shadow var(--transitionDuration);
+}
+
+
+Input {
+    display: block;
+    margin: 0;
+    padding: var(--inputPaddingV) var(--inputPaddingH);
+    color: grey;
+    width: 100%;
+    font-family: inherit;
+    font-size: var(--inputFontSize);
+    font-weight: inherit;
+    line-height: var(--inputLineHeight);
+    border: none;
+    border-radius: 0.5rem;
+    transition: box-shadow var(--transitionDuration);
+}
+
+.container {
+    width: 960px;
+    margin: auto;
+    color: white;
+    font-size: 25px;
+}
+
+    .container h3 {
+        font-size: 20px;
+    }
+
+/*#apiDiv {
+            border: dashed 2px #CCC;
+            padding: 10px;
+            padding-left: 20px;
+        }*/
+
+#apiDiv .imageDiv {
+    text-align: center;
+}
+
+    #apiDiv .imageDiv img {
+        display: none;
+    }
+
+#apiDiv #message {
+    padding-top: 10px;
+}
+
+    #apiDiv #message .resultDiv {
+        background: #FFF;
+        display: inline-block;
+    }
+
+        #apiDiv #message .resultDiv > p {/*//div color*/
+            color: #000;
+            display: inline-block;
+            width: 95%;
+            padding: 10px;
+            border-bottom: double 2px #CCC;
+        }
+
+        #apiDiv #message .resultDiv .result {
+            width: 23%;
+            height: 300px;
+            padding: 6px;
+            float: left;
+            text-align: center;
+            cursor: pointer;
+        }
+
+            #apiDiv #message .resultDiv .result img {
+                width: 75%;
+            }
+
+            #apiDiv #message .resultDiv .result p {
+                margin: 0;
+            }
+
+                #apiDiv #message .resultDiv .result p a { /*//title text*/
+                    color: #808080;
+                    text-decoration: none;
+                    font-size: 20px;
+                    height: 100px;
+                }
+
+                    #apiDiv #message .resultDiv .result p a:hover {
+                        text-decoration: underline;
+                    }
+
+#myModal {
+    color: #000;
+}
